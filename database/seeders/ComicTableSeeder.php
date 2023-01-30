@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use App\Models\Comic;
 
 class ComicTableSeeder extends Seeder
@@ -127,13 +128,14 @@ class ComicTableSeeder extends Seeder
     ];
 
         foreach ($comicslist as $comic) {
-            $newComic = new Comic();
-            $newComic->title = $comic['title'];
-            $newComic->description = $comic['description'];
-            $newComic->price = $comic['price'];
-            $newComic->series = $comic['series'];
-            $newComic->type = $comic['type'];
-            $newComic->save();
+            Comic::create([
+                'title' => $comic['title'],
+                'description' => Str::words($comic['description'], 200),
+                'thumb' => $comic['thumb'],
+                'price' => $comic['price'],
+                'series' => $comic['series'],
+                'type' => $comic['type']
+            ]);
         }
     }
 }
