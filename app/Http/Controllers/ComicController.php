@@ -3,9 +3,19 @@
 namespace App\Http\Controllers;
 use App\Models\Comic;
 use Illuminate\Http\Request;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use Database\Seeders\ComicTableSeeder;
+use Illuminate\Support\Facades\Validator;
 class ComicController extends Controller
 {
+    private $validationRules = [
+        "title" => "required|min:5|max:255",
+        "description" => "required|string",
+        "price" => "required|decimal:2",
+        "series" => "required|string",
+        "type" => "string"
+    ];
 
     public function index() {
         $comics = Comic::all();
@@ -18,21 +28,32 @@ class ComicController extends Controller
         return view("comics.create");
     }
 
-    /** Store a newly created resource in storage.*/
-    public function store(Request $request)
-    {
-        $data = $request->all();
+    public function store(StorePostRequest $request) {
+        $data = $request->validated();
 
-        $comic = new comic();
-        $comic->title = $data["title"];
-        $comic->description = $data["description"];
-        $comic->price = (float) $data["price"];
-        $comic->series = $data["series"];
-        $comic->type = $data["type"];
-        $comic->save();
+        $comic = Comic::create($data);
 
-        return redirect()->route("comics.show", $comic->id);
+        return redirect()->route("comics.show", $comic->id)->with([
+            "status" => "success",
+            "message" => "Creato elemento con ID " . $comic->id
+        ]);
     }
+
+    // /** Store a newly created resource in storage.*/
+    // public function store(Request $request)
+    // {
+    //     $data = $request->all();
+
+    //     $comic = new comic();
+    //     $comic->title = $data["title"];
+    //     $comic->description = $data["description"];
+    //     $comic->price = $data["price"];
+    //     $comic->series = $data["series"];
+    //     $comic->type = $data["type"];
+    //     $comic->save();
+
+    //     return redirect()->route("comics.show", $comic->id);
+    // }
 
     /** Display the specified resource.*/
     public function show($id)
@@ -56,15 +77,16 @@ class ComicController extends Controller
     }
 
     /** Update the specified resource in storage.*/
-    public function update(Request $request, $id) {
-        $data = $request->all();
+    public function update(UpdatePostRequest $request, Comic $comic) {
+        $data = $request->validated();
+        $data["public"] = key_exists("public", $data) ? true : false;
 
-        $comic = Comic::findOrFail($id);
-        // Assegna i valori come il fill e poi esegue il save();
         $comic->update($data);
-
         // devo reindirizzare l'utente ad una pagina in GET
-        return redirect()->route("comics.show", $comic->id);
+        return redirect()->route("comics.show", $comic->id)->with([
+            "status" => "success",
+            "message" => "Elemento modificato con successo"
+        ]);
     }
 
     /** Remove the specified resource from storage. */
@@ -76,5 +98,19 @@ class ComicController extends Controller
 
         // Un volta eliminato l'elemento dalla tabella, dobbiamo reindirizzare l'utente da qualche parte.
         return redirect()->route("comics.index");
+    }
+
+    private function validation($data) {
+        $result = Validator::make($data, $this->validationRules, [
+            "title.required" => "Il titolo è obbligatorio",
+            "title.min" =>  "Il titolo deve avere almeno :min caratteri",
+            "title.max" =>  "Il titolo deve avere massimo :max caratteri",
+            "description.required" => "La descrizione è obbligatoria",
+            "price.required" => "Il prezzo è obbligatorio",
+            "price.decimal:2" => "Il prezzo può avere al massimo 2 decimali",
+            "series.required" => "La serie è obbligatoria",
+        ])->validate();
+
+        return $result;
     }
 }
