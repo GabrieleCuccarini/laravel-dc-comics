@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Requests\CreatePostRequest;
 use App\Models\Comic;
 use Illuminate\Http\Request;
 use App\Http\Requests\StorePostRequest;
@@ -25,6 +27,8 @@ class ComicController extends Controller
     /**Show the form for creating a new resource.*/
     public function create()
     {
+        // $data = $request->validated();
+
         return view("comics.create");
     }
 

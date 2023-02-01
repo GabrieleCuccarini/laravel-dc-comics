@@ -51,14 +51,15 @@
                 <i class="fa-solid fa-pencil"></i>      
               </a>
 
-              <form action="{{ route('comics.destroy', $comic->id) }}" method="POST" 
+              <form 
+              {{-- action="{{ route('comics.destroy', $comic->id) }}"  --}}
                   class="delete-form d-inline-block">
                   @csrf()
                   @method('delete')
 
-                  <button class="btn btn-danger">
+                  <a method='delete' href="{{ route('comics.destroy', $comic->id) }}" class="btn btn-danger">
                     <i class="fas fa-trash"></i>
-                  </button>
+                  </a>
               </form>
             </td>
           </tr>
